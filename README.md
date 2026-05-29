@@ -14,25 +14,38 @@ project. For fastp itself, see the upstream repository:
 
 https://github.com/OpenGene/fastp
 
-## Download
+## Downloading fastp for Windows
 
-Download Windows ZIP files from the release page:
+Prebuilt Windows binaries are available from the
+[Releases](https://github.com/win-ngs/fastp-windows-build/releases) page
+of this repository.
 
-https://github.com/win-ngs/fastp-windows-build/releases
+Download the latest release archive, for example:
 
-| File | Recommended for |
-|---|---|
-| `fastp-1.3.3-ucrt64.zip` | Windows users processing FASTQ or gzip-compressed FASTQ files |
+```text
+fastp-1.3.3-windows-ucrt64.zip
+```
 
-If no release is available yet, build from source using the instructions below.
+After extracting the archive, you should see:
+
+```text
+fastp-1.3.3-windows-ucrt64/
+  fastp.exe
+  libdeflate.dll
+  libgcc_s_seh-1.dll
+  libhwy.dll
+  libisal-2.dll
+  libstdc++-6.dll
+  libwinpthread-1.dll
+```
+
+Keep the DLL files in the same folder as `fastp.exe`.
 
 ## How to Use
 
 This Windows build uses the same command-line options as upstream fastp. For
 detailed usage, options, and interpretation of reports, refer to the upstream
-fastp documentation:
-
-https://github.com/OpenGene/fastp
+[fastp documentation](https://github.com/OpenGene/fastp).
 
 1. Download the ZIP file.
 2. Extract the ZIP file.
@@ -43,7 +56,7 @@ https://github.com/OpenGene/fastp
 Example:
 
 ```powershell
-cd C:\Users\you\Downloads\fastp-1.3.3-ucrt64
+cd C:\Users\you\Downloads\fastp-1.3.3-windows-ucrt64
 .\fastp.exe --version
 .\fastp.exe --help
 ```
@@ -63,31 +76,6 @@ Process paired-end FASTQ files:
 
 Keep the extracted files together. Do not move only `fastp.exe` to another
 folder, because the `.dll` files in the ZIP are needed for the program to start.
-
-## Files in the ZIP
-
-After extracting the ZIP file, you will see `fastp.exe` and several `.dll`
-files.
-
-| File type | What it is | What you should do |
-|---|---|---|
-| `fastp.exe` | The fastp program | Run this file from PowerShell or Command Prompt |
-| `*.dll` files | Runtime libraries needed by `fastp.exe` | Keep them in the same folder as `fastp.exe` |
-| `LICENSE.md` and `THIRD_PARTY_NOTICES.txt` | License and third-party notices | Keep them with the extracted files |
-
-The MSYS2-UCRT64 build currently depends on these runtime DLLs:
-
-```text
-libdeflate.dll
-libgcc_s_seh-1.dll
-libhwy.dll
-libisal-2.dll
-libstdc++-6.dll
-libwinpthread-1.dll
-```
-
-There is no installer. To remove this Windows build, delete the extracted
-folder.
 
 ## Source Tree
 
@@ -130,50 +118,13 @@ Build fastp:
 
 ```sh
 cd /c/path/to/fastp-windows-build/fastp-1.3.3-ucrt64-patch
-make -j$(nproc)
+make
 ```
 
 The executable is created as:
 
 ```text
 fastp-1.3.3-ucrt64-patch/fastp.exe
-```
-
-If GCC reports that it cannot create temporary files under the MSYS2 temporary
-directory, use a temporary directory inside the source tree:
-
-```sh
-mkdir -p .tmp
-export TMPDIR="$PWD/.tmp" TMP="$PWD/.tmp" TEMP="$PWD/.tmp"
-make -j$(nproc)
-```
-
-## Smoke Test
-
-The upstream test FASTQ files are kept in `fastp-1.3.3-ucrt64-patch/testdata/`. After
-building, you can run a small paired-end gzip-output test:
-
-```sh
-cd /c/path/to/fastp-windows-build/fastp-1.3.3-ucrt64-patch
-mkdir -p report-test
-
-./fastp \
-  -i testdata/R1.fq \
-  -I testdata/R2.fq \
-  -o report-test/R1.out.fq.gz \
-  -O report-test/R2.out.fq.gz \
-  -w 2 \
-  -h report-test/fastp.html \
-  -j report-test/fastp.json
-
-gzip -t report-test/R1.out.fq.gz report-test/R2.out.fq.gz
-```
-
-The HTML and JSON reports are written to:
-
-```text
-fastp-1.3.3-ucrt64-patch/report-test/fastp.html
-fastp-1.3.3-ucrt64-patch/report-test/fastp.json
 ```
 
 ## Validation Performed
@@ -190,7 +141,7 @@ Highway 1.4.0
 The following checks were run:
 
 ```text
-make -B -j$(nproc)
+make -B
 ./fastp --version
 paired-end testdata -> gzip-compressed output
 gzip -t output files
@@ -223,4 +174,6 @@ fastp is distributed under the MIT License. See [LICENSE.md](LICENSE.md) and
 [fastp-1.3.3-ucrt64-patch/LICENSE](fastp-1.3.3-ucrt64-patch/LICENSE).
 
 Runtime DLLs included in release ZIP files come from MSYS2 packages and retain
-their respective upstream licenses.
+their respective upstream licenses. See
+[THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt) for package and license
+details.
