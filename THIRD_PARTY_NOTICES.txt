@@ -1,0 +1,221 @@
+Third-Party Notices for fastp-1.3.3-windows-ucrt64
+===================================================
+
+This file summarizes third-party components included in the Windows release
+ZIP for this repository.
+
+This is an informational notice file, not legal advice. Each third-party
+component remains under its own license terms.
+
+
+Packaged runtime files
+----------------------
+
+The release ZIP includes the following runtime files from MSYS2-UCRT64:
+
+  fastp.exe
+      Built from fastp 1.3.3 source with the Windows/MSYS2-UCRT64
+      compatibility patch in this repository.
+
+  libdeflate.dll
+      MSYS2 package: mingw-w64-ucrt-x86_64-libdeflate 1.25-1
+      Upstream: https://github.com/ebiggers/libdeflate
+      License: MIT
+
+  libhwy.dll
+      MSYS2 package: mingw-w64-ucrt-x86_64-highway 1.4.0-2
+      Upstream: https://github.com/google/highway
+      License: Apache-2.0
+
+  libisal-2.dll
+      MSYS2 package: mingw-w64-ucrt-x86_64-isa-l 2.31.1-1
+      Upstream: https://www.intel.com/content/www/us/en/developer/tools/isa-l/overview.html
+      License: BSD-3-Clause / BSD-3-Clear style license
+
+  libgcc_s_seh-1.dll
+  libstdc++-6.dll
+      MSYS2 package: mingw-w64-ucrt-x86_64-gcc-libs 16.1.0-2
+      Upstream: https://gcc.gnu.org
+      License: GPL-3.0-or-later WITH GCC-exception-3.1
+
+  libwinpthread-1.dll
+      MSYS2 package: mingw-w64-ucrt-x86_64-libwinpthread 14.0.0.r37.g2bfe61fba-1
+      Upstream: https://www.mingw-w64.org/
+      License: MIT AND BSD-3-Clause-Clear
+
+
+fastp
+-----
+
+Upstream project:
+  https://github.com/OpenGene/fastp
+
+License:
+  MIT
+
+Copyright notice from upstream fastp 1.3.3:
+
+  Copyright (c) 2016 OpenGene - Open Source Genetics Toolbox
+
+The upstream fastp license text is included in:
+
+  fastp-1.3.3-ucrt64-patch/LICENSE
+
+
+libdeflate
+----------
+
+Upstream project:
+  https://github.com/ebiggers/libdeflate
+
+License:
+  MIT
+
+Copyright notices from the MSYS2 package license file:
+
+  Copyright 2016 Eric Biggers
+  Copyright 2024 Google LLC
+
+MIT license notice:
+
+  Permission is hereby granted, free of charge, to any person
+  obtaining a copy of this software and associated documentation files
+  (the "Software"), to deal in the Software without restriction,
+  including without limitation the rights to use, copy, modify, merge,
+  publish, distribute, sublicense, and/or sell copies of the Software,
+  and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be
+  included in all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+  BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+  ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+
+
+Google Highway
+--------------
+
+Upstream project:
+  https://github.com/google/highway
+
+MSYS2 package license:
+  Apache-2.0
+
+The upstream Highway license file states that the project is primarily
+dual-licensed under the user's choice of either Apache License 2.0 or
+BSD 3-Clause License, with some files under different terms. The MSYS2
+package used for this build records the package license as Apache-2.0.
+
+Apache License 2.0 text:
+  https://www.apache.org/licenses/LICENSE-2.0
+
+
+Intel ISA-L
+-----------
+
+Upstream project:
+  https://www.intel.com/content/www/us/en/developer/tools/isa-l/overview.html
+
+License:
+  BSD-3-Clause / BSD-3-Clear style license
+
+Copyright notice from the MSYS2 package license file:
+
+  Copyright(c) 2011-2024 Intel Corporation All rights reserved.
+
+License notice from the MSYS2 package license file:
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions
+  are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in
+      the documentation and/or other materials provided with the
+      distribution.
+    * Neither the name of Intel Corporation nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+  PARTICULAR PURPOSE AND NONINFRINGEMENT ARE DISCLAIMED. IN NO EVENT
+  SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+  IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  POSSIBILITY OF SUCH DAMAGE.
+
+
+GCC runtime libraries
+---------------------
+
+Included files:
+  libgcc_s_seh-1.dll
+  libstdc++-6.dll
+
+Upstream project:
+  https://gcc.gnu.org
+
+MSYS2 package:
+  mingw-w64-ucrt-x86_64-gcc-libs 16.1.0-2
+
+Package license notice from MSYS2:
+
+  The libgcc, libstdc++, libgomp and libatomic libraries are covered by
+  GPL-3.0-or-later with GCC-exception-3.1. The libquadmath library is
+  covered by LGPL-2.1-or-later. The package as a whole can be
+  redistributed under GPL-3.0-or-later.
+
+GCC Runtime Library Exception 3.1:
+  https://www.gnu.org/licenses/gcc-exception-3.1.html
+
+GNU General Public License version 3:
+  https://www.gnu.org/licenses/gpl-3.0.html
+
+
+MinGW-w64 winpthreads
+---------------------
+
+Included file:
+  libwinpthread-1.dll
+
+Upstream project:
+  https://www.mingw-w64.org/
+
+MSYS2 package:
+  mingw-w64-ucrt-x86_64-libwinpthread 14.0.0.r37.g2bfe61fba-1
+
+Package license:
+  MIT AND BSD-3-Clause-Clear
+
+Copyright notices from the MSYS2 package license file:
+
+  Copyright (c) 2011 mingw-w64 project
+
+  Parts of this library are derived by:
+  Posix Threads library for Microsoft Windows
+  (C) 2010 Lockless Inc.
+  All rights reserved.
+
+
+MSYS2
+-----
+
+The runtime DLLs listed above were copied from an MSYS2-UCRT64 installation.
+MSYS2 package metadata and license files were used to prepare this notice.
+
+MSYS2 project:
+  https://www.msys2.org/

@@ -73,6 +73,7 @@ files.
 |---|---|---|
 | `fastp.exe` | The fastp program | Run this file from PowerShell or Command Prompt |
 | `*.dll` files | Runtime libraries needed by `fastp.exe` | Keep them in the same folder as `fastp.exe` |
+| `LICENSE.md` and `THIRD_PARTY_NOTICES.txt` | License and third-party notices | Keep them with the extracted files |
 
 The MSYS2-UCRT64 build currently depends on these runtime DLLs:
 
@@ -93,17 +94,17 @@ folder.
 The patched source tree is included in this repository:
 
 ```text
-fastp-1.3.3/
+fastp-1.3.3-ucrt64-patch/
 ```
 
 The upstream fastp README and license are kept inside that directory:
 
 ```text
-fastp-1.3.3/README.md
-fastp-1.3.3/LICENSE
+fastp-1.3.3-ucrt64-patch/README.md
+fastp-1.3.3-ucrt64-patch/LICENSE
 ```
 
-Build outputs such as `fastp.exe` and `fastp-1.3.3/obj/` are not meant to be
+Build outputs such as `fastp.exe` and `fastp-1.3.3-ucrt64-patch/obj/` are not meant to be
 committed to git. Release ZIP files should be published through GitHub Releases.
 
 ## Building from Source
@@ -128,14 +129,14 @@ pacman -S --needed \
 Build fastp:
 
 ```sh
-cd /c/path/to/fastp-windows-build/fastp-1.3.3
+cd /c/path/to/fastp-windows-build/fastp-1.3.3-ucrt64-patch
 make -j$(nproc)
 ```
 
 The executable is created as:
 
 ```text
-fastp-1.3.3/fastp.exe
+fastp-1.3.3-ucrt64-patch/fastp.exe
 ```
 
 If GCC reports that it cannot create temporary files under the MSYS2 temporary
@@ -149,11 +150,11 @@ make -j$(nproc)
 
 ## Smoke Test
 
-The upstream test FASTQ files are kept in `fastp-1.3.3/testdata/`. After
+The upstream test FASTQ files are kept in `fastp-1.3.3-ucrt64-patch/testdata/`. After
 building, you can run a small paired-end gzip-output test:
 
 ```sh
-cd /c/path/to/fastp-windows-build/fastp-1.3.3
+cd /c/path/to/fastp-windows-build/fastp-1.3.3-ucrt64-patch
 mkdir -p report-test
 
 ./fastp \
@@ -171,8 +172,8 @@ gzip -t report-test/R1.out.fq.gz report-test/R2.out.fq.gz
 The HTML and JSON reports are written to:
 
 ```text
-fastp-1.3.3/report-test/fastp.html
-fastp-1.3.3/report-test/fastp.json
+fastp-1.3.3-ucrt64-patch/report-test/fastp.html
+fastp-1.3.3-ucrt64-patch/report-test/fastp.json
 ```
 
 ## Validation Performed
@@ -208,9 +209,9 @@ The compatibility patch is limited to the parallel gzip writer:
 
 | File | Change | Reason |
 |---|---|---|
-| `fastp-1.3.3/src/writerthread.cpp` | Added Windows implementations for offset-addressed gzip-block writes using `CreateFileA(FILE_FLAG_OVERLAPPED)`, `WriteFile()` with `OVERLAPPED`, and `SetFilePointerEx()` plus `SetEndOfFile()` | UCRT64 does not provide POSIX `pwrite()`, and shared-file-pointer writes are not safe for the original parallel writer model |
-| `fastp-1.3.3/src/writerthread.cpp` | Reuses one thread-local manual-reset event for overlapped writes | Avoids creating and closing a Windows kernel event for every gzip block |
-| `fastp-1.3.3/src/writerthread.cpp` | Maps `ERROR_OPERATION_ABORTED` to `EIO` instead of `EINTR` | Avoids an infinite retry loop on an aborted Windows I/O operation |
+| `fastp-1.3.3-ucrt64-patch/src/writerthread.cpp` | Added Windows implementations for offset-addressed gzip-block writes using `CreateFileA(FILE_FLAG_OVERLAPPED)`, `WriteFile()` with `OVERLAPPED`, and `SetFilePointerEx()` plus `SetEndOfFile()` | UCRT64 does not provide POSIX `pwrite()`, and shared-file-pointer writes are not safe for the original parallel writer model |
+| `fastp-1.3.3-ucrt64-patch/src/writerthread.cpp` | Reuses one thread-local manual-reset event for overlapped writes | Avoids creating and closing a Windows kernel event for every gzip block |
+| `fastp-1.3.3-ucrt64-patch/src/writerthread.cpp` | Maps `ERROR_OPERATION_ABORTED` to `EIO` instead of `EINTR` | Avoids an infinite retry loop on an aborted Windows I/O operation |
 
 The modified source locations include comments explaining the Windows/UCRT64
 change and keep the previous POSIX or earlier Windows form as a commented-out
@@ -219,7 +220,7 @@ reference.
 ## License
 
 fastp is distributed under the MIT License. See [LICENSE.md](LICENSE.md) and
-[fastp-1.3.3/LICENSE](fastp-1.3.3/LICENSE).
+[fastp-1.3.3-ucrt64-patch/LICENSE](fastp-1.3.3-ucrt64-patch/LICENSE).
 
 Runtime DLLs included in release ZIP files come from MSYS2 packages and retain
 their respective upstream licenses.
