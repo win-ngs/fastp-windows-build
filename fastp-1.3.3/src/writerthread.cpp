@@ -36,10 +36,47 @@ int fastp_errno_from_win32(DWORD error) {
     case ERROR_OUTOFMEMORY:
         return ENOMEM;
     case ERROR_OPERATION_ABORTED:
-        return EINTR;
+        return EIO;
     default:
         return EIO;
     }
+}
+
+class FastpWin32PwriteEvent {
+public:
+    FastpWin32PwriteEvent() {
+        mHandle = CreateEventA(NULL, TRUE, FALSE, NULL);
+        mError = (mHandle == NULL) ? GetLastError() : ERROR_SUCCESS;
+    }
+
+    ~FastpWin32PwriteEvent() {
+        if (mHandle != NULL)
+            CloseHandle(mHandle);
+    }
+
+    HANDLE resetAndGet() {
+        if (mHandle == NULL) {
+            errno = fastp_errno_from_win32(mError);
+            return NULL;
+        }
+        if (!ResetEvent(mHandle)) {
+            errno = fastp_errno_from_win32(GetLastError());
+            return NULL;
+        }
+        return mHandle;
+    }
+
+private:
+    HANDLE mHandle;
+    DWORD mError;
+};
+
+HANDLE fastp_get_thread_pwrite_event() {
+    // Windows/MSYS2-UCRT64: reuse one manual-reset event per worker thread.
+    // Previous Windows implementation created and closed an event for each
+    // pwrite-compatible block write, which is unnecessary in this hot path.
+    thread_local FastpWin32PwriteEvent event;
+    return event.resetAndGet();
 }
 #endif
 
@@ -68,11 +105,25 @@ int fastp_open_pwrite_file(const string& filename) {
 
 int fastp_ftruncate(int fd, size_t size) {
 #ifdef _WIN32
-    // Windows/MSYS2-UCRT64: ftruncate is not consistently available across
-    // MinGW environments, so use the CRT file-size API for this fd.
-    errno_t result = _chsize_s(fd, static_cast<__int64>(size));
-    if (result != 0) {
-        errno = result;
+    // Previous Windows implementation:
+    // errno_t result = _chsize_s(fd, static_cast<__int64>(size));
+    // Windows/MSYS2-UCRT64: use the native HANDLE API for the overlapped file
+    // handle instead of CRT resizing helpers.
+    intptr_t osHandle = _get_osfhandle(fd);
+    if (osHandle == -1) {
+        errno = EBADF;
+        return -1;
+    }
+
+    LARGE_INTEGER pos;
+    pos.QuadPart = static_cast<LONGLONG>(size);
+    HANDLE handle = reinterpret_cast<HANDLE>(osHandle);
+    if (!SetFilePointerEx(handle, pos, NULL, FILE_BEGIN)) {
+        errno = fastp_errno_from_win32(GetLastError());
+        return -1;
+    }
+    if (!SetEndOfFile(handle)) {
+        errno = fastp_errno_from_win32(GetLastError());
         return -1;
     }
     return 0;
@@ -96,9 +147,12 @@ ssize_t fastp_pwrite(int fd, const void* buf, size_t nbytes, size_t offset) {
     uint64_t pos = static_cast<uint64_t>(offset);
     overlapped.Offset = static_cast<DWORD>(pos & 0xffffffffu);
     overlapped.OffsetHigh = static_cast<DWORD>(pos >> 32);
-    overlapped.hEvent = CreateEventA(NULL, TRUE, FALSE, NULL);
+    // Previous Windows implementation:
+    // overlapped.hEvent = CreateEventA(NULL, TRUE, FALSE, NULL);
+    // Windows/MSYS2-UCRT64: reuse a thread-local event to avoid per-block
+    // kernel object creation while keeping each overlapped write independent.
+    overlapped.hEvent = fastp_get_thread_pwrite_event();
     if (overlapped.hEvent == NULL) {
-        errno = fastp_errno_from_win32(GetLastError());
         return -1;
     }
 
@@ -113,13 +167,11 @@ ssize_t fastp_pwrite(int fd, const void* buf, size_t nbytes, size_t offset) {
             error = ok ? ERROR_SUCCESS : GetLastError();
         }
         if (!ok) {
-            CloseHandle(overlapped.hEvent);
             errno = fastp_errno_from_win32(error);
             return -1;
         }
     }
 
-    CloseHandle(overlapped.hEvent);
     return static_cast<ssize_t>(written);
 #else
     return pwrite(fd, buf, nbytes, offset);
