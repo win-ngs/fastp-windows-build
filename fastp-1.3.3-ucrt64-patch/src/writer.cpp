@@ -26,6 +26,11 @@ SOFTWARE.
 #include "util.h"
 #include <string.h>
 
+#ifdef _WIN32
+#include <io.h>
+#include <fcntl.h>
+#endif
+
 Writer::Writer(Options* opt, string filename, int compression, bool isSTDOUT){
 	mCompression = compression;
 	mFilename = filename;
@@ -64,6 +69,13 @@ void Writer::init(){
 		error_exit("Failed to allocate write buffer with size: " + to_string(mBufSize));
 	}
 	if(mSTDOUT) {
+#ifdef _WIN32
+		// MSYS2/UCRT64: stdout defaults to text mode on native Windows, which
+		// would translate every '\n' in the FASTQ stream into "\r\n". Force
+		// binary mode so piped/redirected --stdout output keeps LF line endings
+		// (file output already uses fopen("wb")).
+		_setmode(_fileno(stdout), _O_BINARY);
+#endif
 		mFP = stdout;
 		return ;
 	}

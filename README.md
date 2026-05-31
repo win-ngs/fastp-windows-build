@@ -146,23 +146,36 @@ make -B
 paired-end testdata -> gzip-compressed output
 gzip -t output files
 single-thread output compared with 8-thread output after decompression
+--stdout output compared byte-for-byte with -o file output
 ```
 
 The single-thread and 8-thread decompressed FASTQ outputs matched byte-for-byte
 in the validation run.
 
+With the `--stdout` binary-mode fix, `fastp --stdout` output matched the
+corresponding `-o` file output byte-for-byte, confirming LF (not CRLF) line
+endings for streamed FASTQ on native Windows. Note that the `.json` and `.html`
+reports are still written through text-mode `ofstream`, so on Windows they use
+CRLF line endings; this is cosmetic (JSON parsers and browsers accept it) and is
+left as-is.
+
 ## MSYS2-UCRT64 Compatibility Patch
 
-The upstream fastp 1.3.3 source did not compile unchanged in MSYS2-UCRT64
-because the MinGW UCRT64 environment does not provide POSIX `pwrite()`.
+The upstream fastp 1.3.3 source did not build and run correctly unchanged in
+MSYS2-UCRT64: the MinGW UCRT64 environment does not provide POSIX `pwrite()`,
+and on native Windows `stdout` defaults to text mode, which would corrupt
+`--stdout` FASTQ output with CRLF line endings.
 
-The compatibility patch is limited to the parallel gzip writer:
+The compatibility patch covers the parallel gzip writer and the `--stdout`
+writer. Paths below are relative to the patched source directory
+`fastp-1.3.3-ucrt64-patch/`.
 
 | File | Change | Reason |
 |---|---|---|
-| `fastp-1.3.3-ucrt64-patch/src/writerthread.cpp` | Added Windows implementations for offset-addressed gzip-block writes using `CreateFileA(FILE_FLAG_OVERLAPPED)`, `WriteFile()` with `OVERLAPPED`, and `SetFilePointerEx()` plus `SetEndOfFile()` | UCRT64 does not provide POSIX `pwrite()`, and shared-file-pointer writes are not safe for the original parallel writer model |
-| `fastp-1.3.3-ucrt64-patch/src/writerthread.cpp` | Reuses one thread-local manual-reset event for overlapped writes | Avoids creating and closing a Windows kernel event for every gzip block |
-| `fastp-1.3.3-ucrt64-patch/src/writerthread.cpp` | Maps `ERROR_OPERATION_ABORTED` to `EIO` instead of `EINTR` | Avoids an infinite retry loop on an aborted Windows I/O operation |
+| `src/writerthread.cpp` | Added Windows implementations for offset-addressed gzip-block writes using `CreateFileA(FILE_FLAG_OVERLAPPED)`, `WriteFile()` with `OVERLAPPED`, and `SetFilePointerEx()` plus `SetEndOfFile()` | UCRT64 does not provide POSIX `pwrite()`, and shared-file-pointer writes are not safe for the original parallel writer model |
+| `src/writerthread.cpp` | Wraps the `OVERLAPPED` event in a `thread_local` object that calls `CreateEventA` once per worker thread and `ResetEvent` before each block write, instead of calling `CreateEvent`/`CloseHandle` around every write | Avoids allocating and freeing a Windows kernel event object on every gzip-block write in the parallel writer hot path |
+| `src/writerthread.cpp` | Maps `ERROR_OPERATION_ABORTED` to `EIO` instead of `EINTR` | Avoids an infinite retry loop on an aborted Windows I/O operation |
+| `src/writer.cpp` | Sets `stdout` to binary mode (`_setmode(_fileno(stdout), _O_BINARY)`) on Windows before `--stdout` streaming | Native Windows `stdout` defaults to text mode, which would translate every `\n` into `\r\n` and corrupt the piped FASTQ; file output already uses `fopen("wb")`, so `-o`/`-O` output was unaffected |
 
 The modified source locations include comments explaining the Windows/UCRT64
 change and keep the previous POSIX or earlier Windows form as a commented-out
